@@ -97,12 +97,15 @@ class Admin {
 				<?php else : ?>
 					<p><?php esc_html_e( 'Connect your HubSpot account to get started.', 'ehsf' ); ?></p>
 					<p class="description">
-						<?php esc_html_e( 'You\'ll need a HubSpot Private App Access Token.', 'ehsf' ); ?>
-						<a href="https://knowledge.hubspot.com/integrations/private-apps" target="_blank" rel="noopener">
-							<?php esc_html_e( 'How to create one', 'ehsf' ); ?> &rarr;
-						</a>
+						<?php esc_html_e( 'You\'ll need a HubSpot Private App Access Token. To create one:', 'ehsf' ); ?>
 						<br>
-						<?php esc_html_e( 'When creating the app, make sure to enable the "Forms" scope.', 'ehsf' ); ?>
+						<?php esc_html_e( '1. In HubSpot, go to Settings > Integrations > Private Apps', 'ehsf' ); ?>
+						<br>
+						<?php esc_html_e( '2. Click "Create a private app", give it a name', 'ehsf' ); ?>
+						<br>
+						<?php esc_html_e( '3. On the Scopes tab, enable "forms" (under Marketing)', 'ehsf' ); ?>
+						<br>
+						<?php esc_html_e( '4. Click "Create app", then copy the Access Token', 'ehsf' ); ?>
 					</p>
 					<div class="ehsf-connect-row">
 						<input type="password" id="ehsf-token" class="regular-text"

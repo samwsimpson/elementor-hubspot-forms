@@ -3,7 +3,7 @@
  * Plugin Name: Elementor HubSpot Forms
  * Plugin URI:  https://kumokodo.ai/wpplugins
  * Description: Auto-generate Elementor Pro forms from HubSpot form embed codes. Paste your embed code, get a fully styled form that submits to HubSpot.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author:      KumoKodo.ai
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EHSF_VERSION', '1.0.0' );
+define( 'EHSF_VERSION', '1.0.1' );
 define( 'EHSF_PLUGIN_FILE', __FILE__ );
 define( 'EHSF_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'EHSF_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -50,7 +50,7 @@ function ehsf_init() {
 	}
 
 	// Check Elementor Pro is active (Form widget is Pro-only).
-	if ( ! class_exists( '\ElementorPro\Plugin' ) ) {
+	if ( ! defined( 'ELEMENTOR_PRO_VERSION' ) && ! class_exists( '\ElementorPro\Plugin' ) ) {
 		add_action( 'admin_notices', 'ehsf_notice_missing_elementor_pro' );
 		return;
 	}

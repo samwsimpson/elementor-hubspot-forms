@@ -31,8 +31,9 @@ class Plugin {
 		require_once EHSF_PLUGIN_DIR . 'includes/class-hubspot-api.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-admin.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-form-generator.php';
-		require_once EHSF_PLUGIN_DIR . 'includes/class-form-action.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-ajax-handler.php';
+		// class-form-action.php is loaded later in register_form_action()
+		// because it extends Action_Base which isn't available until Elementor Pro's forms module loads.
 	}
 
 	private function init_components(): void {
@@ -53,6 +54,7 @@ class Plugin {
 	 * Register the HubSpot Submit form action with Elementor Pro.
 	 */
 	public function register_form_action( $registrar ): void {
+		require_once EHSF_PLUGIN_DIR . 'includes/class-form-action.php';
 		$registrar->register( new Form_Action() );
 	}
 }
