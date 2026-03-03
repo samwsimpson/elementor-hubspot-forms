@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class License {
 
-	private const API_BASE = 'https://api.lemonsqueezy.com/v1/licenses';
+	private const API_BASE = 'https://kumokodo.ai/api/licenses';
 
 	private static ?bool $is_pro_cache = null;
 
@@ -33,7 +33,7 @@ class License {
 	}
 
 	/**
-	 * Activate a license key with LemonSqueezy.
+	 * Activate a license key with the KumoKodo licensing API.
 	 *
 	 * @return array{success: bool, error?: string}
 	 */
@@ -41,12 +41,12 @@ class License {
 		$response = wp_remote_post( self::API_BASE . '/activate', [
 			'headers' => [
 				'Accept'       => 'application/json',
-				'Content-Type' => 'application/x-www-form-urlencoded',
+				'Content-Type' => 'application/json',
 			],
-			'body' => [
-				'license_key'   => $license_key,
-				'instance_name' => self::get_instance_name(),
-			],
+			'body'    => wp_json_encode( [
+				'license_key' => $license_key,
+				'domain'      => self::get_domain(),
+			] ),
 			'timeout' => 15,
 		] );
 
@@ -56,7 +56,7 @@ class License {
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		if ( empty( $body['activated'] ) ) {
+		if ( empty( $body['valid'] ) ) {
 			$error = $body['error'] ?? 'License activation failed.';
 			return [ 'success' => false, 'error' => $error ];
 		}
@@ -64,11 +64,10 @@ class License {
 		// Store license data.
 		self::save_license_key( $license_key );
 		update_option( 'ehsf_license_status', 'active' );
-		update_option( 'ehsf_license_instance_id', $body['instance']['id'] ?? '' );
 		update_option( 'ehsf_license_next_check', time() + DAY_IN_SECONDS );
 
-		if ( ! empty( $body['license_key']['expires_at'] ) ) {
-			update_option( 'ehsf_license_expires_at', $body['license_key']['expires_at'] );
+		if ( ! empty( $body['license']['expires_at'] ) ) {
+			update_option( 'ehsf_license_expires_at', $body['license']['expires_at'] );
 		}
 
 		// Reset the static cache.
@@ -78,24 +77,23 @@ class License {
 	}
 
 	/**
-	 * Deactivate the license key with LemonSqueezy.
+	 * Deactivate the license key with the KumoKodo licensing API.
 	 *
 	 * @return array{success: bool, error?: string}
 	 */
 	public static function deactivate(): array {
 		$license_key = self::get_license_key();
-		$instance_id = get_option( 'ehsf_license_instance_id', '' );
 
-		if ( ! empty( $license_key ) && ! empty( $instance_id ) ) {
+		if ( ! empty( $license_key ) ) {
 			wp_remote_post( self::API_BASE . '/deactivate', [
 				'headers' => [
 					'Accept'       => 'application/json',
-					'Content-Type' => 'application/x-www-form-urlencoded',
+					'Content-Type' => 'application/json',
 				],
-				'body' => [
+				'body'    => wp_json_encode( [
 					'license_key' => $license_key,
-					'instance_id' => $instance_id,
-				],
+					'domain'      => self::get_domain(),
+				] ),
 				'timeout' => 15,
 			] );
 		}
@@ -103,7 +101,6 @@ class License {
 		// Clear all license data regardless of API response.
 		delete_option( 'ehsf_license_key' );
 		delete_option( 'ehsf_license_status' );
-		delete_option( 'ehsf_license_instance_id' );
 		delete_option( 'ehsf_license_next_check' );
 		delete_option( 'ehsf_license_expires_at' );
 
@@ -128,7 +125,6 @@ class License {
 		}
 
 		$license_key = self::get_license_key();
-		$instance_id = get_option( 'ehsf_license_instance_id', '' );
 
 		if ( empty( $license_key ) ) {
 			update_option( 'ehsf_license_status', 'inactive' );
@@ -136,17 +132,15 @@ class License {
 			return;
 		}
 
-		$body_params = [ 'license_key' => $license_key ];
-		if ( ! empty( $instance_id ) ) {
-			$body_params['instance_id'] = $instance_id;
-		}
-
 		$response = wp_remote_post( self::API_BASE . '/validate', [
 			'headers' => [
 				'Accept'       => 'application/json',
-				'Content-Type' => 'application/x-www-form-urlencoded',
+				'Content-Type' => 'application/json',
 			],
-			'body'    => $body_params,
+			'body'    => wp_json_encode( [
+				'license_key' => $license_key,
+				'domain'      => self::get_domain(),
+			] ),
 			'timeout' => 15,
 		] );
 
@@ -182,9 +176,9 @@ class License {
 	}
 
 	/**
-	 * Get the site identifier used for license activation.
+	 * Get the site domain used for license activation.
 	 */
-	private static function get_instance_name(): string {
+	private static function get_domain(): string {
 		$url = get_site_url();
 		// Strip protocol and trailing slash for a clean identifier.
 		return preg_replace( '#^https?://#', '', rtrim( $url, '/' ) );
