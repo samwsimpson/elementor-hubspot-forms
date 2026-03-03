@@ -54,12 +54,16 @@ class Admin {
 		wp_localize_script( 'ehsf-admin', 'ehsfAdmin', [
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'ehsf_admin_nonce' ),
+			'is_pro'   => License::is_pro(),
 			'strings'  => [
-				'connecting'     => __( 'Connecting...', 'ehsf' ),
-				'connected'      => __( 'Connected!', 'ehsf' ),
-				'fetching'       => __( 'Fetching form from HubSpot...', 'ehsf' ),
-				'generating'     => __( 'Generating Elementor template...', 'ehsf' ),
-				'confirm_delete' => __( 'Are you sure you want to delete this template?', 'ehsf' ),
+				'connecting'         => __( 'Connecting...', 'ehsf' ),
+				'connected'          => __( 'Connected!', 'ehsf' ),
+				'fetching'           => __( 'Fetching form from HubSpot...', 'ehsf' ),
+				'generating'         => __( 'Generating Elementor template...', 'ehsf' ),
+				'confirm_delete'     => __( 'Are you sure you want to delete this template?', 'ehsf' ),
+				'activating'         => __( 'Activating license...', 'ehsf' ),
+				'deactivating'       => __( 'Deactivating...', 'ehsf' ),
+				'confirm_deactivate' => __( 'Deactivate your Pro license on this site?', 'ehsf' ),
 			],
 		] );
 	}
@@ -74,10 +78,16 @@ class Admin {
 
 		$portal_id    = $this->api->get_portal_id();
 		$is_connected = ! empty( $portal_id ) && ! empty( $this->api->get_access_token() );
+		$is_pro       = License::is_pro();
 
 		?>
 		<div class="wrap ehsf-wrap">
-			<h1><?php esc_html_e( 'Elementor HubSpot Forms', 'ehsf' ); ?></h1>
+			<h1>
+				<?php esc_html_e( 'Elementor HubSpot Forms', 'ehsf' ); ?>
+				<?php if ( $is_pro ) : ?>
+					<span class="ehsf-pro-badge"><?php esc_html_e( 'Pro', 'ehsf' ); ?></span>
+				<?php endif; ?>
+			</h1>
 
 			<?php if ( ! $is_connected ) : ?>
 			<!-- How It Works (shown before connection) -->
@@ -158,6 +168,21 @@ class Admin {
 					</ol>
 				</details>
 
+				<?php if ( ! $is_pro ) : ?>
+					<?php
+					$form_count = $this->count_generated_forms();
+					$remaining  = max( 0, 3 - $form_count );
+					?>
+					<p class="ehsf-form-limit-notice">
+						<?php printf(
+							esc_html__( 'Free plan: %1$d of 3 forms used (%2$d remaining).', 'ehsf' ),
+							$form_count,
+							$remaining
+						); ?>
+						<a href="https://kumokodo.ai/wpplugins" target="_blank"><?php esc_html_e( 'Upgrade to Pro', 'ehsf' ); ?></a>
+					</p>
+				<?php endif; ?>
+
 				<label for="ehsf-embed-code" class="ehsf-label">
 					<?php esc_html_e( 'HubSpot Form Embed Code', 'ehsf' ); ?>
 				</label>
@@ -228,9 +253,100 @@ class Admin {
 				<h2><?php esc_html_e( 'Recent Submissions', 'ehsf' ); ?></h2>
 				<?php $this->render_submission_log(); ?>
 			</div>
+
+			<?php if ( ! $is_pro ) : ?>
+			<!-- Pro Upgrade Teaser -->
+			<div class="ehsf-card ehsf-pro-teaser">
+				<h2><?php esc_html_e( 'Unlock Pro Features', 'ehsf' ); ?></h2>
+				<div class="ehsf-pro-features">
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-chart-bar"></span>
+						<h3><?php esc_html_e( 'Form Analytics', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Submission counts, success rates, and 30-day trend charts for every form.', 'ehsf' ); ?></p>
+					</div>
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-forms"></span>
+						<h3><?php esc_html_e( 'Unlimited Forms', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Remove the 3-form limit. Generate as many forms as you need.', 'ehsf' ); ?></p>
+					</div>
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-randomize"></span>
+						<h3><?php esc_html_e( 'Advanced Submissions', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Custom redirects, email notifications, and webhook forwarding after form submissions.', 'ehsf' ); ?></p>
+					</div>
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-list-view"></span>
+						<h3><?php esc_html_e( 'Bulk Generation', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Fetch all your HubSpot forms and generate Elementor templates in one click.', 'ehsf' ); ?></p>
+					</div>
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-admin-settings"></span>
+						<h3><?php esc_html_e( 'Multi-Step Forms', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Auto-generate multi-step Elementor forms from HubSpot field groups.', 'ehsf' ); ?></p>
+					</div>
+					<div class="ehsf-pro-feature">
+						<span class="dashicons dashicons-admin-users"></span>
+						<h3><?php esc_html_e( 'CRM Pre-fill', 'ehsf' ); ?></h3>
+						<p><?php esc_html_e( 'Auto-populate fields for returning HubSpot contacts.', 'ehsf' ); ?></p>
+					</div>
+				</div>
+				<p class="ehsf-pro-cta">
+					<a href="https://kumokodo.ai/wpplugins" target="_blank" class="button button-primary button-hero">
+						<?php esc_html_e( 'Upgrade to Pro', 'ehsf' ); ?> &rarr;
+					</a>
+				</p>
+			</div>
 			<?php endif; ?>
+
+			<?php endif; ?>
+
+			<!-- License Section (always visible) -->
+			<div class="ehsf-card">
+				<h2><?php esc_html_e( 'License', 'ehsf' ); ?></h2>
+				<?php $this->render_license_section(); ?>
+			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the license activation/deactivation section.
+	 */
+	private function render_license_section(): void {
+		$license_info = License::get_license_info();
+		$is_pro       = License::is_pro();
+
+		if ( $is_pro ) : ?>
+			<div class="ehsf-status ehsf-status--connected">
+				<span class="dashicons dashicons-yes-alt"></span>
+				<?php esc_html_e( 'Pro license is active.', 'ehsf' ); ?>
+				<?php if ( ! empty( $license_info['expires_at'] ) ) : ?>
+					<span class="ehsf-license-expires">
+						<?php printf(
+							esc_html__( 'Expires: %s', 'ehsf' ),
+							esc_html( date_i18n( get_option( 'date_format' ), strtotime( $license_info['expires_at'] ) ) )
+						); ?>
+					</span>
+				<?php endif; ?>
+			</div>
+			<button type="button" class="button" id="ehsf-deactivate-license">
+				<?php esc_html_e( 'Deactivate License', 'ehsf' ); ?>
+			</button>
+		<?php else : ?>
+			<p><?php esc_html_e( 'Enter your Pro license key to unlock all features.', 'ehsf' ); ?></p>
+			<div class="ehsf-connect-row">
+				<input type="text" id="ehsf-license-key" class="regular-text"
+				       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+				<button type="button" class="button button-primary" id="ehsf-activate-license">
+					<?php esc_html_e( 'Activate', 'ehsf' ); ?>
+				</button>
+			</div>
+			<div id="ehsf-license-status" class="ehsf-status-message"></div>
+			<p class="description">
+				<?php esc_html_e( 'Don\'t have a license?', 'ehsf' ); ?>
+				<a href="https://kumokodo.ai/wpplugins" target="_blank"><?php esc_html_e( 'Get Pro', 'ehsf' ); ?> &rarr;</a>
+			</p>
+		<?php endif;
 	}
 
 	/**
@@ -317,5 +433,20 @@ class Admin {
 		}
 
 		echo '</tbody></table>';
+	}
+
+	/**
+	 * Count the number of plugin-generated forms.
+	 */
+	private function count_generated_forms(): int {
+		$query = new \WP_Query( [
+			'post_type'      => 'elementor_library',
+			'meta_key'       => '_ehsf_hubspot_form_id',
+			'posts_per_page' => 1,
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+		] );
+
+		return $query->found_posts;
 	}
 }

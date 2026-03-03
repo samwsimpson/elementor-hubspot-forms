@@ -14,6 +14,13 @@ delete_option( 'ehsf_hubspot_access_token' );
 delete_option( 'ehsf_hubspot_portal_id' );
 delete_option( 'ehsf_submission_log' );
 
+// Remove license options.
+delete_option( 'ehsf_license_key' );
+delete_option( 'ehsf_license_status' );
+delete_option( 'ehsf_license_instance_id' );
+delete_option( 'ehsf_license_next_check' );
+delete_option( 'ehsf_license_expires_at' );
+
 // Clean up any remaining transients.
 global $wpdb;
 $wpdb->query(

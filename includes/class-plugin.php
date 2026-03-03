@@ -28,15 +28,20 @@ class Plugin {
 	}
 
 	private function load_dependencies(): void {
+		require_once EHSF_PLUGIN_DIR . 'includes/class-license.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-hubspot-api.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-admin.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-form-generator.php';
 		require_once EHSF_PLUGIN_DIR . 'includes/class-ajax-handler.php';
 		// class-form-action.php is loaded later in register_form_action()
 		// because it extends Action_Base which isn't available until Elementor Pro's forms module loads.
+
+		// Pro modules are loaded conditionally when license is active.
+		// Future: require_once pro/ files here when they are built.
 	}
 
 	private function init_components(): void {
+		License::init();
 		$this->hubspot_api    = new HubSpot_API();
 		$this->form_generator = new Form_Generator( $this->hubspot_api );
 		$this->ajax_handler   = new Ajax_Handler( $this->hubspot_api, $this->form_generator );

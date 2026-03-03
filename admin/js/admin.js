@@ -174,7 +174,12 @@
                 $('#ehsf-embed-code').val('');
                 $('#ehsf-preview').slideUp(200);
             } else {
-                alert(response.data.message);
+                // Check if this is an upgrade prompt (form limit reached).
+                if (response.data && response.data.upgrade) {
+                    alert(response.data.message);
+                } else {
+                    alert(response.data.message);
+                }
             }
         })
         .fail(function() {
@@ -215,6 +220,78 @@
         .fail(function() {
             alert('Network error. Please try again.');
             $btn.prop('disabled', false);
+        });
+    });
+
+    // --- License Activation ---
+
+    $('#ehsf-activate-license').on('click', function() {
+        var $btn    = $(this);
+        var $status = $('#ehsf-license-status');
+        var key     = $('#ehsf-license-key').val().trim();
+
+        if (!key) {
+            $status.text('Please enter a license key.').removeClass('ehsf-msg-success').addClass('ehsf-msg-error');
+            return;
+        }
+
+        $btn.prop('disabled', true);
+        $status.text(ehsfAdmin.strings.activating).removeClass('ehsf-msg-error ehsf-msg-success');
+
+        $.post(ehsfAdmin.ajax_url, {
+            action:      'ehsf_activate_license',
+            nonce:       ehsfAdmin.nonce,
+            license_key: key
+        })
+        .done(function(response) {
+            if (response.success) {
+                $status.text('License activated! Reloading...').addClass('ehsf-msg-success');
+                setTimeout(function() { location.reload(); }, 1200);
+            } else {
+                $status.text(response.data.message).addClass('ehsf-msg-error');
+            }
+        })
+        .fail(function() {
+            $status.text('Network error. Please try again.').addClass('ehsf-msg-error');
+        })
+        .always(function() {
+            $btn.prop('disabled', false);
+        });
+    });
+
+    // Allow pressing Enter in the license key field.
+    $('#ehsf-license-key').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#ehsf-activate-license').trigger('click');
+        }
+    });
+
+    // --- License Deactivation ---
+
+    $('#ehsf-deactivate-license').on('click', function() {
+        if (!confirm(ehsfAdmin.strings.confirm_deactivate)) {
+            return;
+        }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true).text(ehsfAdmin.strings.deactivating);
+
+        $.post(ehsfAdmin.ajax_url, {
+            action: 'ehsf_deactivate_license',
+            nonce:  ehsfAdmin.nonce
+        })
+        .done(function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert(response.data ? response.data.message : 'Failed to deactivate.');
+                $btn.prop('disabled', false).text('Deactivate License');
+            }
+        })
+        .fail(function() {
+            alert('Network error. Please try again.');
+            $btn.prop('disabled', false).text('Deactivate License');
         });
     });
 
