@@ -79,6 +79,31 @@ class Admin {
 		<div class="wrap ehsf-wrap">
 			<h1><?php esc_html_e( 'Elementor HubSpot Forms', 'ehsf' ); ?></h1>
 
+			<?php if ( ! $is_connected ) : ?>
+			<!-- How It Works (shown before connection) -->
+			<div class="ehsf-card ehsf-how-it-works">
+				<h2><?php esc_html_e( 'How It Works', 'ehsf' ); ?></h2>
+				<ol class="ehsf-steps">
+					<li>
+						<strong><?php esc_html_e( 'Connect HubSpot', 'ehsf' ); ?></strong>
+						<span><?php esc_html_e( 'Enter your Private App token below to link your HubSpot account.', 'ehsf' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Paste Embed Code', 'ehsf' ); ?></strong>
+						<span><?php esc_html_e( 'Copy the embed code from any HubSpot form and paste it here.', 'ehsf' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Preview & Generate', 'ehsf' ); ?></strong>
+						<span><?php esc_html_e( 'Review the mapped fields, then click to create an Elementor template.', 'ehsf' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Style & Publish', 'ehsf' ); ?></strong>
+						<span><?php esc_html_e( 'Open the template in Elementor to style it, then insert it into any page. Submissions go straight to HubSpot automatically.', 'ehsf' ); ?></span>
+					</li>
+				</ol>
+			</div>
+			<?php endif; ?>
+
 			<!-- Section 1: Connection -->
 			<div class="ehsf-card">
 				<h2><?php esc_html_e( 'HubSpot Connection', 'ehsf' ); ?></h2>
@@ -122,7 +147,16 @@ class Admin {
 			<!-- Section 2: Form Generator -->
 			<div class="ehsf-card">
 				<h2><?php esc_html_e( 'Generate Form from HubSpot', 'ehsf' ); ?></h2>
-				<p><?php esc_html_e( 'Paste your HubSpot form embed code below. The plugin will fetch the form fields and create an Elementor template you can insert into any page.', 'ehsf' ); ?></p>
+				<p><?php esc_html_e( 'Paste your HubSpot form embed code below to auto-generate an Elementor form with all fields mapped.', 'ehsf' ); ?></p>
+				<details class="ehsf-help-toggle">
+					<summary><?php esc_html_e( 'Where do I find the embed code?', 'ehsf' ); ?></summary>
+					<ol class="description">
+						<li><?php esc_html_e( 'In HubSpot, go to Marketing > Forms', 'ehsf' ); ?></li>
+						<li><?php esc_html_e( 'Click on the form you want to use', 'ehsf' ); ?></li>
+						<li><?php esc_html_e( 'Click "Share" (top right), then "Embed code"', 'ehsf' ); ?></li>
+						<li><?php esc_html_e( 'Copy the entire code snippet and paste it below', 'ehsf' ); ?></li>
+					</ol>
+				</details>
 
 				<label for="ehsf-embed-code" class="ehsf-label">
 					<?php esc_html_e( 'HubSpot Form Embed Code', 'ehsf' ); ?>
@@ -166,14 +200,19 @@ class Admin {
 				<div id="ehsf-result" style="display:none;">
 					<div class="notice notice-success inline">
 						<p>
-							<?php esc_html_e( 'Template created successfully!', 'ehsf' ); ?>
+							<strong><?php esc_html_e( 'Template created successfully!', 'ehsf' ); ?></strong>
+						</p>
+						<p>
 							<a id="ehsf-edit-link" href="#" target="_blank" class="button button-primary">
 								<?php esc_html_e( 'Edit in Elementor', 'ehsf' ); ?> &rarr;
 							</a>
 						</p>
-						<p class="description">
-							<?php esc_html_e( 'Open the template in Elementor to style it, then insert it into any page using Elementor\'s template widget or shortcode.', 'ehsf' ); ?>
-						</p>
+						<p class="description"><?php esc_html_e( 'Next steps:', 'ehsf' ); ?></p>
+						<ol class="description">
+							<li><?php esc_html_e( 'Click "Edit in Elementor" to style the form (colors, fonts, spacing, etc.)', 'ehsf' ); ?></li>
+							<li><?php esc_html_e( 'To add the form to a page: edit the page in Elementor, add a Template widget, and select this template — or use the shortcode from the table below.', 'ehsf' ); ?></li>
+							<li><?php esc_html_e( 'That\'s it! Submissions will be sent to HubSpot automatically.', 'ehsf' ); ?></li>
+						</ol>
 					</div>
 				</div>
 			</div>

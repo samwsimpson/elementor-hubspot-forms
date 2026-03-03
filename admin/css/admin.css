@@ -18,6 +18,68 @@
 	font-size: 1.2em;
 }
 
+/* How It Works steps */
+.ehsf-how-it-works ol.ehsf-steps {
+	counter-reset: step;
+	list-style: none;
+	padding: 0;
+	margin: 12px 0 0;
+}
+
+.ehsf-how-it-works ol.ehsf-steps li {
+	counter-increment: step;
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 10px 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.ehsf-how-it-works ol.ehsf-steps li:last-child {
+	border-bottom: none;
+}
+
+.ehsf-how-it-works ol.ehsf-steps li::before {
+	content: counter(step);
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	line-height: 28px;
+	text-align: center;
+	border-radius: 50%;
+	background: #2271b1;
+	color: #fff;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.ehsf-how-it-works ol.ehsf-steps li strong {
+	min-width: 140px;
+}
+
+.ehsf-how-it-works ol.ehsf-steps li span {
+	color: #50575e;
+}
+
+/* Help toggle */
+.ehsf-help-toggle {
+	margin-bottom: 16px;
+}
+
+.ehsf-help-toggle summary {
+	cursor: pointer;
+	color: #2271b1;
+	font-weight: 500;
+}
+
+.ehsf-help-toggle summary:hover {
+	color: #135e96;
+}
+
+.ehsf-help-toggle ol {
+	margin-top: 8px;
+}
+
 /* Connection row */
 .ehsf-connect-row {
 	display: flex;
