@@ -112,15 +112,16 @@ class Form_Generator {
 	 * @return array{success: bool, template_id?: int, edit_url?: string, error?: string}
 	 */
 	public function create_template( string $portal_id, string $form_id, array $form_data ): array {
-		$form_name = $form_data['name'] ?? 'HubSpot Form';
-		$fields    = self::extract_fields( $form_data );
+		$form_name   = $form_data['name'] ?? 'HubSpot Form';
+		$button_text = self::extract_button_text( $form_data );
+		$fields      = self::extract_fields( $form_data );
 
 		if ( empty( $fields ) ) {
 			return [ 'success' => false, 'error' => 'No fields found in the HubSpot form definition.' ];
 		}
 
 		$el_fields     = $this->build_elementor_fields( $fields );
-		$elementor_data = $this->build_elementor_data( $el_fields, $portal_id, $form_id, $form_name );
+		$elementor_data = $this->build_elementor_data( $el_fields, $portal_id, $form_id, $form_name, $button_text );
 
 		$post_id = wp_insert_post( [
 			'post_type'    => 'elementor_library',
@@ -207,13 +208,34 @@ class Form_Generator {
 	}
 
 	/**
+	 * Extract the submit button text from a HubSpot form definition.
+	 * Falls back to "Submit" if none is set.
+	 *
+	 * @param array $form_data Full HubSpot form definition from the API.
+	 */
+	public static function extract_button_text( array $form_data ): string {
+		// v3 API: displayOptions.submitButtonText
+		$text = $form_data['displayOptions']['submitButtonText'] ?? '';
+
+		// Legacy / v2 API fallback: submitText
+		if ( empty( $text ) ) {
+			$text = $form_data['submitText'] ?? '';
+		}
+
+		$text = trim( (string) $text );
+
+		return $text !== '' ? $text : __( 'Submit', 'ehsf' );
+	}
+
+	/**
 	 * Build the complete _elementor_data JSON structure.
 	 */
 	private function build_elementor_data(
 		array $el_fields,
 		string $portal_id,
 		string $form_id,
-		string $form_name
+		string $form_name,
+		string $button_text
 	): array {
 		return [
 			[
@@ -236,7 +258,7 @@ class Form_Generator {
 							'ehsf_portal_id'       => sanitize_text_field( $portal_id ),
 							'ehsf_form_guid'       => sanitize_text_field( $form_id ),
 							'ehsf_object_type_id'  => '0-1',
-							'button_text'          => __( 'Submit', 'ehsf' ),
+							'button_text'          => sanitize_text_field( $button_text ),
 							'button_size'          => 'sm',
 							'button_width'         => '100',
 						],
