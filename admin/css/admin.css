@@ -271,3 +271,27 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* Support link in page header */
+.ehsf-support-link {
+	margin-left: 12px;
+}
+
+.ehsf-support-link .dashicons {
+	margin-right: 4px;
+}
+
+/* Support footer below all cards */
+.ehsf-support-footer {
+	margin-top: 24px;
+	padding: 16px 20px;
+	text-align: center;
+	color: #50575e;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.ehsf-support-footer a {
+	text-decoration: none;
+}

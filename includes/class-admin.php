@@ -87,6 +87,10 @@ class Admin {
 				<?php if ( $is_pro ) : ?>
 					<span class="ehsf-pro-badge"><?php esc_html_e( 'Pro', 'ehsf' ); ?></span>
 				<?php endif; ?>
+				<a href="https://www.kumokodo.ai/support" target="_blank" rel="noopener" class="page-title-action ehsf-support-link">
+					<span class="dashicons dashicons-sos" style="vertical-align: text-bottom;"></span>
+					<?php esc_html_e( 'Contact Support', 'ehsf' ); ?>
+				</a>
 			</h1>
 
 			<?php if ( ! $is_connected ) : ?>
@@ -305,6 +309,17 @@ class Admin {
 				<h2><?php esc_html_e( 'License', 'ehsf' ); ?></h2>
 				<?php $this->render_license_section(); ?>
 			</div>
+
+			<!-- Need Help? Footer -->
+			<p class="ehsf-support-footer">
+				<?php
+				printf(
+					/* translators: %s: support link */
+					esc_html__( 'Need help or ran into a problem? %s and we\'ll take a look.', 'ehsf' ),
+					'<a href="https://www.kumokodo.ai/support" target="_blank" rel="noopener"><strong>' . esc_html__( 'Contact KumoKodo support', 'ehsf' ) . '</strong></a>'
+				);
+				?>
+			</p>
 		</div>
 		<?php
 	}

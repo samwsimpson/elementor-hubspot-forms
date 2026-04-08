@@ -180,25 +180,40 @@ class HubSpot_API {
 	/**
 	 * Parse a HubSpot embed code to extract portalId and formId.
 	 *
+	 * Supports both embed formats:
+	 *   - Legacy: hbspt.forms.create({ portalId: "...", formId: "..." })
+	 *   - Current: <div data-portal-id="..." data-form-id="..."></div>
+	 *
 	 * @param string $embed_code Raw embed code pasted by the user.
 	 * @return array{portal_id?: string, form_id?: string, error?: string}
 	 */
 	public static function parse_embed_code( string $embed_code ): array {
-		$portal_match = [];
-		$form_match   = [];
+		$portal_id = '';
+		$form_id   = '';
 
-		// Match portalId (quoted or unquoted, numeric).
-		preg_match( '/portalId\s*:\s*["\']?(\d+)["\']?/', $embed_code, $portal_match );
+		// Try current format first: data-portal-id / data-form-id attributes.
+		if ( preg_match( '/data-portal-id\s*=\s*["\'](\d+)["\']/', $embed_code, $m ) ) {
+			$portal_id = $m[1];
+		}
+		if ( preg_match( '/data-form-id\s*=\s*["\']([a-f0-9\-]{36})["\']/', $embed_code, $m ) ) {
+			$form_id = $m[1];
+		}
 
-		// Match formId (UUID format with hyphens).
-		preg_match( '/formId\s*:\s*["\']([a-f0-9\-]{36})["\']/', $embed_code, $form_match );
-
-		$portal_id = $portal_match[1] ?? '';
-		$form_id   = $form_match[1] ?? '';
+		// Fallback to legacy format: hbspt.forms.create({ portalId: ..., formId: ... }).
+		if ( empty( $portal_id ) ) {
+			if ( preg_match( '/portalId\s*:\s*["\']?(\d+)["\']?/', $embed_code, $m ) ) {
+				$portal_id = $m[1];
+			}
+		}
+		if ( empty( $form_id ) ) {
+			if ( preg_match( '/formId\s*:\s*["\']([a-f0-9\-]{36})["\']/', $embed_code, $m ) ) {
+				$form_id = $m[1];
+			}
+		}
 
 		if ( empty( $portal_id ) || empty( $form_id ) ) {
 			return [
-				'error' => 'Could not extract portalId and formId from the embed code. Please paste the full HubSpot form embed code containing hbspt.forms.create({...}).',
+				'error' => 'Could not extract portalId and formId from the embed code. Please paste the full HubSpot form embed code from HubSpot (either the current data-attribute format or the legacy hbspt.forms.create format).',
 			];
 		}
 
