@@ -54,9 +54,11 @@ class Plugin {
 			[ $this, 'register_form_action' ]
 		);
 
-		add_action(
-			'elementor/frontend/widget/before_render',
-			[ $this, 'tag_hubspot_forms' ]
+		add_filter(
+			'elementor/widget/render_content',
+			[ $this, 'tag_hubspot_forms' ],
+			10,
+			2
 		);
 	}
 
@@ -71,22 +73,34 @@ class Plugin {
 	/**
 	 * Tag Elementor forms that use the HubSpot Submit action so the frontend
 	 * can scope dataLayer / analytics listeners to them.
+	 *
+	 * Elementor Pro's form widget hardcodes `class="elementor-form"` in its
+	 * template, so using add_render_attribute() produces a duplicate `class`
+	 * attribute that browsers silently drop. We rewrite the opening tag
+	 * instead.
 	 */
-	public function tag_hubspot_forms( $widget ): void {
+	public function tag_hubspot_forms( string $content, $widget ): string {
 		if ( $widget->get_name() !== 'form' ) {
-			return;
+			return $content;
 		}
 
 		$settings       = $widget->get_settings_for_display();
 		$submit_actions = (array) ( $settings['submit_actions'] ?? [] );
 
 		if ( ! in_array( 'hubspot_submit', $submit_actions, true ) ) {
-			return;
+			return $content;
 		}
 
-		$widget->add_render_attribute( 'form', [
-			'class'                  => 'ehsf-hubspot-form',
-			'data-ehsf-form-guid'    => $settings['ehsf_form_guid'] ?? '',
-		] );
+		$guid = $settings['ehsf_form_guid'] ?? '';
+
+		return preg_replace(
+			'/<form\s+class="elementor-form"/',
+			sprintf(
+				'<form class="elementor-form ehsf-hubspot-form" data-ehsf-form-guid="%s"',
+				esc_attr( $guid )
+			),
+			$content,
+			1
+		);
 	}
 }
