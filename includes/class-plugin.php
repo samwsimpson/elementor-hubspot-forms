@@ -53,6 +53,11 @@ class Plugin {
 			'elementor_pro/forms/actions/register',
 			[ $this, 'register_form_action' ]
 		);
+
+		add_action(
+			'elementor/frontend/widget/before_render',
+			[ $this, 'tag_hubspot_forms' ]
+		);
 	}
 
 	/**
@@ -61,5 +66,27 @@ class Plugin {
 	public function register_form_action( $registrar ): void {
 		require_once EHSF_PLUGIN_DIR . 'includes/class-form-action.php';
 		$registrar->register( new Form_Action() );
+	}
+
+	/**
+	 * Tag Elementor forms that use the HubSpot Submit action so the frontend
+	 * can scope dataLayer / analytics listeners to them.
+	 */
+	public function tag_hubspot_forms( $widget ): void {
+		if ( $widget->get_name() !== 'form' ) {
+			return;
+		}
+
+		$settings       = $widget->get_settings_for_display();
+		$submit_actions = (array) ( $settings['submit_actions'] ?? [] );
+
+		if ( ! in_array( 'hubspot_submit', $submit_actions, true ) ) {
+			return;
+		}
+
+		$widget->add_render_attribute( 'form', [
+			'class'                  => 'ehsf-hubspot-form',
+			'data-ehsf-form-guid'    => $settings['ehsf_form_guid'] ?? '',
+		] );
 	}
 }
